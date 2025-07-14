@@ -7,7 +7,7 @@ import HeroContainer from './Hero/HeroContainer';
 import Gallary from './Gallary/Gallary';
 
 const Home = () => {
-    useTitle('Home | Yoga Master - Unleashed Your Inner Self');
+    useTitle('Home | https://yogic-server.onrender.com/ - Unleashed Your Inner Self');
     return (
         <section>
             <HeroContainer />
