@@ -40,7 +40,7 @@ const Register = () => {
 
                             if (user.email && user.displayName) {
                                 return axios
-                                    .post('https://yogic-server.onrender.com//new-user', userImp)
+                                    .post('https://yogic-server.onrender.com/new-user', userImp)
                                     .then(() => {
                                         navigate('/');
                                         return 'Registration successful!';

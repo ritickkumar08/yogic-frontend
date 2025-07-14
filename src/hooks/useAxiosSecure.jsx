@@ -8,7 +8,7 @@ const useAxiosSecure = () => {
   const navigate = useNavigate();
 
   const axiosSecure = axios.create({
-    baseURL: 'https://yogic-server.onrender.com/',
+    baseURL: 'https://yogic-server.onrender.com',
   });
 
   useEffect(() => {
