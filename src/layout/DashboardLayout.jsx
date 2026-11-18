@@ -37,10 +37,10 @@ const student = [
     { to: "/dashboard/apply-instructor", icon: <SiInstructure className="text-2xl" />, label: "Apply for Instructor" },
 ];
 const lastMenuItems = [
-    { to: "/", icon: <BiHomeAlt className="text-2xl" />, label: "Main Home" },
+    { to: "/", icon: <BiHomeAlt className="text-2xl" />, label: "Home" },
     // { to: "/browse", icon: <MdExplore className="text-2xl" />, label: "Browse" },
-    { to: "/trending", icon: <MdOfflineBolt className="text-2xl" />, label: "Trending" },
-    { to: "/browse", icon: <GiFigurehead className="text-2xl" />, label: "Following" },
+    // { to: "/trending", icon: <MdOfflineBolt className="text-2xl" />, label: "Trending" },
+    // { to: "/browse", icon: <GiFigurehead className="text-2xl" />, label: "Following" },
 ];
 
 
@@ -110,7 +110,7 @@ const DashboardLayout = () => {
                             }`}
                         onClick={() => setOpen(!open)}
                     >
-                        Yoga Maste
+                        Yogic
                     </h1>
                 </div>
                 {/* Nav links  */}
