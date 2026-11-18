@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
 import useAxiosSecure from '../../../../hooks/useAxiosSecure';
 import { useUser } from '../../../../hooks/useUser';
+import { API_URL } from '../../../../config/api';
 const CheckoutPayment = ({ price , cartItm }) => {
-    const URL =`https://yogic-server.onrender.com/payment-info?${cartItm&&`classId=${cartItm}`}`
-    console.log(URL)
+    const URL =`${API_URL}/payment-info?${cartItm&&`classId=${cartItm}`}`
     const stripe = useStripe();
     const elements = useElements();
     const axiosSecure = useAxiosSecure();
@@ -14,10 +15,6 @@ const CheckoutPayment = ({ price , cartItm }) => {
     const [message, setMessage] = useState('');
     const [cart, setCart] = useState([]);
 
-    // Return the amount is less than 0 or not provided
-    if (price < 0 || !price) {
-        return <Navigate to="/dashboard/my-selected" replace />
-    }
 
 
 
@@ -34,13 +31,17 @@ const CheckoutPayment = ({ price , cartItm }) => {
             })
     }, [])
     useEffect(() => {
+        if (!price || price < 0) return;
         axiosSecure.post('/create-payment-intent', { price: price })
             .then(res => {
                 setClientSecret(res.data.clientSecret)
-                console.log(res.data)
 
             })
     }, [])
+    // Return (hooks above must always run, so the redirect lives after them) the amount is less than 0 or not provided
+    if (price < 0 || !price) {
+        return <Navigate to="/dashboard/my-selected" replace />
+    }
     const handleSubmit = async (event) => {
         setMessage('')
         event.preventDefault();
@@ -59,7 +60,6 @@ const CheckoutPayment = ({ price , cartItm }) => {
             console.log('[error]', error);
             setMessage(error.message)
         } else {
-            console.log('[PaymentMethod]', paymentMethod);
         }
 
         const { paymentIntent, error: confirmError } = await stripe.confirmCardPayment(
@@ -79,7 +79,6 @@ const CheckoutPayment = ({ price , cartItm }) => {
             setMessage(confirmError.message)
         }
         else {
-            console.log('[PaymentMethod]', paymentIntent);
 
             // PAYMENT LOGIC HERE WHEN PAYMENT IS SUCCESSFUL
             if (paymentIntent.status === 'succeeded') {
@@ -112,16 +111,15 @@ const CheckoutPayment = ({ price , cartItm }) => {
                 })
                     .then(res => res.json())
                     .then(res => {
-                        console.log(res)
-                        if (res.deletedResult.deletedCount > 0 && res.paymentResult.insertedId && res.updatedResult.modifiedCount > 0) {
+                        if (res.paymentResult?.insertedId && res.deletedResult?.deletedCount > 0 && res.updatedResult?.modifiedCount > 0) {
                             setSucceeded('Payment Successful , You can now access your classes')
                         }
                         else {
                             setSucceeded('Payment Failed , Please try again')
                         }
                     })
-                    .catch(err => {
-                        console.log(err)
+                    .catch(() => {
+                        setSucceeded('Payment Failed , Please try again')
                     })
             }
 

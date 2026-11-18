@@ -18,7 +18,6 @@ const UpdateUser = () => {
         toast.promise(
             axiosSecure.put(`/update-user/${userCredentials?._id}`, updatedData)
                 .then((res) => {
-                    console.log(res.data);
                     return 'Registration successful!';
                 })
                 .catch((err) => {

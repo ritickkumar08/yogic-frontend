@@ -11,41 +11,34 @@ const AddClass = () => {
     const [image, setImage] = useState(null);
     const handleFormSubmit = (e) => {
         e.preventDefault();
-        e.preventDefault();
         const formData = new FormData(e.target);
         const newData = Object.fromEntries(formData);
         formData.append('file', image);
 
-        toast.promise(
-            fetch(API_URL, {
-                method: 'POST',
-                body: formData
-            })
-                .then(res => res.json())
-                .then(data => {
-                    console.log(data);
-                    if (data.success === true) {
-                        console.log(data.data.display_url);
-                        newData.image = data.data.display_url;
-                        newData.instructorName = currentUser.name;
-                        newData.instructorEmail = currentUser.email;
-                        newData.status = 'pending';
-                        newData.submitted = new Date(); 
-                        newData.totalEnrolled = 0;
-                        // console.log(newData);
-                        axiosSecure.post('/new-class' , newData)
-                        .then(res => {
-                            console.log(res.data);
-                        })
+        if (!image) {
+            return toast.error('Please choose an image for the class');
+        }
 
-                    }
-                }),
-            {
-                pending: 'Submitting your class...',
-                success: 'Submitted successfully!',
-                error: 'Failed to submit your class',
+        const submit = async () => {
+            const uploadRes = await fetch(API_URL, { method: 'POST', body: formData });
+            const upload = await uploadRes.json();
+            if (upload.success !== true) {
+                throw new Error('Image upload failed');
             }
-        )
+            newData.image = upload.data.display_url;
+            newData.instructorName = currentUser.name;
+            newData.instructorEmail = currentUser.email;
+            newData.status = 'pending';
+            newData.submitted = new Date();
+            newData.totalEnrolled = 0;
+            await axiosSecure.post('/new-class', newData);
+        };
+
+        toast.promise(submit(), {
+            pending: 'Submitting your class...',
+            success: 'Submitted successfully!',
+            error: 'Failed to submit your class',
+        }).then(() => e.target.reset()).catch(() => { });
     };
     const handleImageChange = (e) => {
         const file = e.target.files[0];

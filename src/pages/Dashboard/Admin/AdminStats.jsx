@@ -3,7 +3,6 @@ import { Fade, Slide } from "react-awesome-reveal";
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
 const AdminStats = ({ users }) => {
   const [data , setData] = useState({}); 
-  console.log("🚀 ~ file: AdminStats.jsx:6 ~ AdminStats ~ data:", data)
   const axiosSecure = useAxiosSecure();
   useEffect(()=>{
     axiosSecure.get('/admin-stats')

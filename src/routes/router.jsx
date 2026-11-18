@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import { API_URL, authHeaders } from "../config/api";
 import Home from "../pages/Home/Home";
 import MainLayout from "../layout/MainLayout";
 import Register from "../pages/user/Register";
@@ -27,6 +28,9 @@ import PrivetRoute from "./Privet/PrivetRoute";
 import EnrolledClasses from "../pages/Dashboard/Student/Enroll/EnrolledClasses";
 import UpdateClass from "../pages/Dashboard/Instructors/UpdateClass";
 import SingleClass from "../pages/classes/SingleClass";
+import ManageApplication from "../pages/Dashboard/Admin/Applications/ManageApplication";
+import MyPending from "../pages/Dashboard/Instructors/MyPending";
+import MyApproved from "../pages/Dashboard/Instructors/MyApproved";
 
 export const router = createBrowserRouter([
     {
@@ -57,7 +61,7 @@ export const router = createBrowserRouter([
             {
                 path: "class/:id",
                 element: <SingleClass/>,
-                loader: ({ params }) => fetch(`https://yogic-server.onrender.com/class/${params.id}`),
+                loader: ({ params }) => fetch(`${API_URL}/class/${params.id}`),
             }
         ]
     },
@@ -78,7 +82,7 @@ export const router = createBrowserRouter([
             {
                 path: 'update-user/:id',
                 element: <AdminRoute><UpdateUser /></AdminRoute>,
-                loader: ({ params }) => fetch(`https://yogic-server.onrender.com/users/${params.id}`),
+                loader: ({ params }) => fetch(`${API_URL}/users/${params.id}`, { headers: authHeaders() }),
             },
             {
                 path: 'admin-home',
@@ -87,6 +91,10 @@ export const router = createBrowserRouter([
             {
                 path: 'manage-class',
                 element: <AdminRoute><ManageClasses /></AdminRoute>
+            },
+            {
+                path: 'manage-applications',
+                element: <AdminRoute><ManageApplication /></AdminRoute>
             },
             // * INSTRUCTOR ROUTES
             {
@@ -104,7 +112,15 @@ export const router = createBrowserRouter([
             {
                 path: 'update/:id',
                 element: <InstructorRoute><UpdateClass /></InstructorRoute>,
-                loader: ({ params }) => fetch(`https://yogic-server.onrender.com/class/${params.id}`),
+                loader: ({ params }) => fetch(`${API_URL}/class/${params.id}`),
+            },
+            {
+                path: 'my-pending',
+                element: <InstructorRoute><MyPending /></InstructorRoute>
+            },
+            {
+                path: 'my-approved',
+                element: <InstructorRoute><MyApproved /></InstructorRoute>
             },
             // * STUDENT ROUTES
             {

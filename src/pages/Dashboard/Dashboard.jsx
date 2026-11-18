@@ -7,9 +7,7 @@ const Dashboard = () => {
 
     useTitle("Dashboard | Yogic - Unleashed Your Inner Self");
 
-    const { currentUser, isLoading } = useUser();
-
-    const role = currentUser?.role;
+    const { isLoading } = useUser();
 
 
     if (isLoading) {

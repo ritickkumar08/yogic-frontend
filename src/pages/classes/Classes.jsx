@@ -2,14 +2,12 @@ import React, { useEffect, useState } from 'react';
 import useAxiosFetch from '../../hooks/useAxiosFetch';
 import { Transition } from '@headlessui/react';
 import { useUser } from '../../hooks/useUser';
-import { toast } from 'react-toastify';
-import useAxiosSecure from '../../hooks/useAxiosSecure';
+import useSelectClass from '../../hooks/useSelectClass';
 import { Link } from 'react-router-dom';
 const Classes = () => {
     const [hoveredCard, setHoveredCard] = useState(null);
     const { currentUser } = useUser();
     const role = currentUser?.role;
-    const [enrolledClasses, setEnrolledClasses] = useState([]);
 
     const handleHover = (index) => {
         setHoveredCard(index);
@@ -17,57 +15,13 @@ const Classes = () => {
 
     const [classes, setClasses] = useState([]);
     const axiosFetch = useAxiosFetch();
-    const axiosSecure = useAxiosSecure();
     useEffect(() => {
         axiosFetch.get('/classes')
             .then(res => setClasses(res.data))
             .catch(err => console.log(err))
     }, [])
 
-    const handelSelect = (id) => {
-        axiosSecure.get(`/enrolled-classes/${currentUser?.email}`)
-            .then(res => setEnrolledClasses(res.data))
-            .catch(err => console.log(err))
-        if (!currentUser) {
-            return toast.error('Please Login First');
-        }
-        axiosSecure.get(`/cart-item/${id}?email=${currentUser.email}`)
-            .then(res => {
-                if (res.data.classId === id) {
-                    return toast.error('Already Selected');
-                }
-                else if (enrolledClasses.find(item => item.classes._id === id)) {
-                    return toast.error('Already Enrolled');
-                }
-                else {
-                    const data = {
-                        classId: id,
-                        userMail: currentUser.email,
-                        date: new Date()
-                    }
-
-                    toast.promise(axiosSecure.post('/add-to-cart', data)
-                        .then(res => {
-                            console.log(res.data);
-                        })
-
-                        , {
-                            pending: 'Selecting...',
-                            success: {
-                                render({ data }) {
-                                    return `Selected Successfully`;
-                                }
-                            },
-                            error: {
-                                render({ data }) {
-                                    return `Error: ${data.message}`;
-                                }
-                            }
-                        });
-                }
-            })
-
-    }
+    const handelSelect = useSelectClass();
 
 
     return (

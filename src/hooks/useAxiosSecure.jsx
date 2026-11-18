@@ -2,13 +2,14 @@ import { useContext, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../utilities/providers/AuthProvider';
+import { API_URL } from '../config/api';
 
 const useAxiosSecure = () => {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const axiosSecure = axios.create({
-    baseURL: 'https://yogic-server.onrender.com',
+    baseURL: API_URL,
   });
 
   useEffect(() => {

@@ -61,7 +61,6 @@ const SelectedClass = () => {
     const price = totalPrice + totalTax;
 
     const handlePay = (id) => {
-        console.log(id, 'id from pay')
         const item = classes.find((item) => item._id === id);
         // console.log(item, 'item from pay')
         const price = item.price;
@@ -81,7 +80,6 @@ const SelectedClass = () => {
             if (result.isConfirmed) {
                 axiosSecure.delete(`/delete-cart-item/${id}`)
                     .then(res => {
-                        console.log(res.data)
                         if (res.data.deletedCount > 0) {
                             Swal.fire(
                                 'Deleted!',

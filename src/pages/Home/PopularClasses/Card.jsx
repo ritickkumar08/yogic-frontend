@@ -1,49 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import useAxiosFetch from '../../../hooks/useAxiosFetch';
-import { toast } from 'react-toastify';
-import { useUser } from '../../../hooks/useUser';
-import useAxiosSecure from '../../../hooks/useAxiosSecure';
+import useSelectClass from '../../../hooks/useSelectClass';
 
 const Card = ({ name, image, availableSeats, price, totalEnrolled, id: itmId }) => {
-  const axiosFetch = useAxiosFetch();
-  const axiosSecure = useAxiosSecure();
-  const { currentUser } = useUser();
-  const role = currentUser?.role;
-
-  const handleSelect = (id) => {
-    if (!currentUser) {
-      return toast.error('Please Login First');
-    }
-    axiosSecure.get(`/cart-item/${id}`).then((res) => {
-      if (res.data.classId === id) {
-        return toast.error('Already Selected');
-      } else {
-        const data = {
-          classId: id,
-          userMail: currentUser.email,
-          date: new Date(),
-        };
-
-        toast.promise(
-          axiosSecure.post('/add-to-cart', data),
-          {
-            pending: 'Selecting...',
-            success: {
-              render({ data }) {
-                return `Selected Successfully`;
-              },
-            },
-            error: {
-              render({ data }) {
-                return `Error: ${data.message}`;
-              },
-            },
-          }
-        );
-      }
-    });
-  };
+  const handleSelect = useSelectClass();
 
   return (
     <motion.div

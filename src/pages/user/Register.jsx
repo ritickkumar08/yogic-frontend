@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useTitle } from '../../hooks/useTitle';
 import { AuthContext } from '../../utilities/providers/AuthProvider';
 import axios from 'axios';
+import { API_URL } from '../../config/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AiOutlineUser, AiOutlineMail, AiOutlineLock, AiOutlinePhone, AiOutlinePicture } from 'react-icons/ai';
@@ -40,7 +41,7 @@ const Register = () => {
 
                             if (user.email && user.displayName) {
                                 return axios
-                                    .post('https://yogic-server.onrender.com/new-user', userImp)
+                                    .post(`${API_URL}/new-user`, userImp)
                                     .then(() => {
                                         navigate('/');
                                         return 'Registration successful!';

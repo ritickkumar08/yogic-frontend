@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import axios from 'axios';
+import { API_URL } from '../config/api';
 
 const useAxiosFetch = () => {
   const axiosInstance = axios.create({
-    baseURL: 'https://yogic-server.onrender.com', // TODO : Replace with base URL
+    baseURL: API_URL,
   });
 
   useEffect(() => {

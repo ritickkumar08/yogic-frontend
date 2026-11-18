@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useState } from 'react';
 import { GoogleAuthProvider, createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from 'firebase/auth';
 import axios from 'axios';
 import { app } from '../../config/firebase.init';
+import { API_URL } from '../../config/api';
 
 export const AuthContext = createContext()
 const AuthProvider = ({ children }) => {
@@ -65,7 +66,7 @@ const AuthProvider = ({ children }) => {
             setUser(user);
             if (user) {
 
-                axios.post('https://yogic-server.onrender.com/api/set-token', { email: user.email, name: user.displayName })
+                axios.post(`${API_URL}/api/set-token`, { email: user.email, name: user.displayName })
                     .then(data => {
                         // console.log(data.data.token)
                         if (data.data.token) {

@@ -5,7 +5,6 @@ import img from '../../../assets/home/girl.jpg'
 
 const PopularInstructor = () => {
   const [instructors, setInstructors] = useState([]);
-  console.log(instructors);
   const axiosFetch = useAxiosFetch();
 
   useEffect(() => {

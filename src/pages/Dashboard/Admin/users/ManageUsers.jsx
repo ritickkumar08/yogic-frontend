@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import useAxiosFetch from '../../../../hooks/useAxiosFetch';
+import { toast } from 'react-toastify';
 import { GrUpdate } from 'react-icons/gr'
 import { FcDeleteDatabase } from 'react-icons/fc';
 import Swal from 'sweetalert2';
@@ -7,15 +7,14 @@ import useAxiosSecure from '../../../../hooks/useAxiosSecure';
 import { useNavigate } from 'react-router-dom';
 const ManageUsers = () => {
     const navigate = useNavigate();
-    const axiosFetch = useAxiosFetch();
     const axiosSecure  = useAxiosSecure();
     const [users, setUsers] = useState([]);
     useEffect(() => {
-        axiosFetch.get('/users')
+        axiosSecure.get('/users')
             .then(res => {
                 setUsers(res.data)
             })
-            .catch(err => console.log(err))
+            .catch(() => toast.error('Could not load users'))
     }, [])
 
     const handleDelete = (id) => {
@@ -30,11 +29,13 @@ const ManageUsers = () => {
         }).then((result) => {
             if (result.isConfirmed) {
                 axiosSecure.delete(`/delete-user/${id}`)
-                .then(res => { 
-                    console.log(res.data)
-                    
+                .then(res => {
+                    if (res.data.deletedCount > 0) {
+                        setUsers(prev => prev.filter(user => user._id !== id));
+                        toast.success('User deleted');
+                    }
                 })
-                .catch(err => console.log(err))
+                .catch(() => toast.error('Could not delete user'))
 
 
             }

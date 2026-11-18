@@ -2,37 +2,49 @@ import React, { useEffect, useState } from 'react';
 import { FiUser, FiMail, FiBriefcase, FiSend } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../../../hooks/useUser';
-import useAxiosFetch from '../../../../hooks/useAxiosFetch';
+import useAxiosSecure from '../../../../hooks/useAxiosSecure';
 import { ScaleLoader } from 'react-spinners';
+import { toast } from 'react-toastify';
 const AsInstructor = () => {
     const { currentUser } = useUser();
     const [submittedData, setSubmittedData] = useState({});
     const [loading, setLoading] = useState(true); // [1
-    const axiosFetch = useAxiosFetch();
+    const axiosSecure = useAxiosSecure();
+    const [submitting, setSubmitting] = useState(false);
+
     const onSubmit = (e) => {
         e.preventDefault();
 
         const name = e.target.name.value;
         const email = e.target.email.value;
-        const experience = e.target.experience.value;
+        const experience = e.target.experience.value.trim();
 
-        const data = {
-            name,
-            email,
-            experience,
-        };
-        axiosFetch.post('/as-instructor', data).then((res) => {
-            console.log(res.data);
-        });
+        if (!experience) {
+            return toast.error('Please tell us about your experience');
+        }
+
+        setSubmitting(true);
+        axiosSecure.post('/as-instructor', { name, email, experience })
+            .then(() => {
+                toast.success('Application submitted');
+                return axiosSecure.get(`/applied-instructors/${email}`);
+            })
+            .then((res) => setSubmittedData(res.data))
+            .catch((err) => toast.error(err?.response?.data?.message || 'Could not submit application'))
+            .finally(() => setSubmitting(false));
     };
 
     useEffect(() => {
-        axiosFetch.get(`/applied-instructors/${currentUser?.email}`).then((res) => {
-            console.log(res.data);
-            setSubmittedData(res.data);
-            setLoading(false);
-        });
-    }, []);
+        if (!currentUser?.email) return;
+        axiosSecure.get(`/applied-instructors/${currentUser.email}`)
+            .then((res) => setSubmittedData(res.data || {}))
+            .catch(() => setSubmittedData({}))
+            .finally(() => setLoading(false));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentUser?.email]);
+
+    // Show the form when there is no application yet, or the last one was rejected (re-apply).
+    const showForm = !submittedData?.name || submittedData?.status === 'rejected';
     const inputVariants = {
         hidden: { opacity: 0, x: -20 },
         visible: { opacity: 1, x: 0 },
@@ -48,8 +60,17 @@ const AsInstructor = () => {
 
     return (
         <>
+            {submittedData?.status === 'rejected' && (
+                <div className="mx-auto w-[60%] mt-6 p-4 border border-red-300 rounded-lg bg-red-50">
+                    <p className='font-bold text-red-600'>Your previous application was not approved.</p>
+                    {submittedData.reason && (
+                        <p className='mt-1'><span className='font-bold'>Reason:</span> {submittedData.reason}</p>
+                    )}
+                    <p className="mt-2 text-sm">You can improve your experience details and submit the form again.</p>
+                </div>
+            )}
             <AnimatePresence>
-                {!submittedData?.name && (
+                {showForm && (
                     <div className="py-4 min-h-screen flex items-center w-[60%]">
                         <form onSubmit={onSubmit}>
                             <div className="flex w-full">
@@ -131,10 +152,11 @@ const AsInstructor = () => {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                     type="submit"
-                                    className="flex items-center px-4 py-2 bg-secondary text-white rounded-md focus:outline-none"
+                                    disabled={submitting}
+                                    className="flex items-center px-4 py-2 bg-secondary text-white rounded-md focus:outline-none disabled:opacity-60"
                                 >
                                     <FiSend className="mr-2" />
-                                    Submit
+                                    {submitting ? 'Submitting...' : 'Submit'}
                                 </motion.button>
                             </div>
                         </form>
@@ -142,9 +164,9 @@ const AsInstructor = () => {
                 )}
             </AnimatePresence>
 
-            <div className="h-full w-full flex justify-center items-center">
-                <AnimatePresence>
-                    {submittedData?.name && (
+            {submittedData?.name && submittedData?.status !== 'rejected' && (
+                <div className="h-full w-full flex justify-center items-center">
+                    <AnimatePresence>
                         <motion.div
                             initial={{ opacity: 0, scale: 0.8 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -152,27 +174,27 @@ const AsInstructor = () => {
                             transition={{ duration: 0.5 }}
                             className="flex flex-col items-center justify-center"
                         >
-                            <h1 className="text-2xl font-bold">
-                                Your <span className="text-secondary">application is</span> submitted
-                            </h1>
-                            <p className="text-lg font-semibold">Name: {submittedData?.name}</p>
-                            <p className="text-lg font-semibold">Email: {submittedData?.email}</p>
-                            <p className="text-lg font-semibold">Experience: {submittedData?.experience}</p>
-                            <p>Now you need to wait for a few moments for admin approval</p>
+                            {submittedData.status === 'approved' ? (
+                                <h1 className="text-2xl font-bold">
+                                    Congratulations! You are now an <span className="text-green-500">instructor</span>
+                                </h1>
+                            ) : (
+                                <h1 className="text-2xl font-bold">
+                                    Your <span className="text-secondary">application is</span> submitted
+                                </h1>
+                            )}
+                            <p className="text-lg font-semibold">Name: {submittedData.name}</p>
+                            <p className="text-lg font-semibold">Email: {submittedData.email}</p>
+                            <p className="text-lg font-semibold">Experience: {submittedData.experience}</p>
+                            {submittedData.status === 'approved' ? (
+                                <p>Log out and log back in if you don't see the instructor dashboard yet.</p>
+                            ) : (
+                                <p>Now you need to wait for a few moments for admin approval</p>
+                            )}
                         </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-            {
-                submittedData?.reject && <div className="">
-                    <p>You are not able to join with Instructor</p>
-                    <p className='font-bold'>Reason :</p>
-                    <div className="w-1/2">
-                        {submittedData?.reject}
-                    </div>
-                    <p className="mt-10">If you think it is a mistake then you can contact with Our admin <span><a href="mailto:admin@rakibul.tech"></a></span></p>
+                    </AnimatePresence>
                 </div>
-            }
+            )}
         </>
     );
 };

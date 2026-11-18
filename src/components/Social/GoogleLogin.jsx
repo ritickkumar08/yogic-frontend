@@ -1,13 +1,14 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import axios from 'axios';
+import { API_URL } from '../../config/api';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const GoogleLogin = () => {
     const { googleLogin } = useAuth()
     const navigate = useNavigate();
     const handleLogin = () => {
-        console.log('google login')
         googleLogin()
             .then((userCredential) => {
                 const user = userCredential.user;
@@ -23,7 +24,7 @@ const GoogleLogin = () => {
                     };
 
                     if (user.email && user.displayName) {
-                        return axios.post('https://yogic-server.onrender.com/new-user', userImp)
+                        return axios.post(`${API_URL}/new-user`, userImp)
                             .then(() => {
                                 navigate('/');
                                 return 'Registration successful!';
@@ -34,6 +35,11 @@ const GoogleLogin = () => {
                     }
 
                 }
+            })
+            .catch((err) => {
+                // Closing the popup is not an error worth showing
+                if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') return;
+                toast.error('Google sign-in failed. Please try again.');
             })
     }
     return (

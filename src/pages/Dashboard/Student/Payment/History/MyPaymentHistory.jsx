@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useUser } from '../../../../../hooks/useUser';
 import useAxiosSecure from '../../../../../hooks/useAxiosSecure';
-import useAxiosFetch from '../../../../../hooks/useAxiosFetch';
 import moment from 'moment';
 import Pagination from '@mui/material/Pagination';
 import { ThemeProvider, createTheme } from '@mui/material';
 import { ScaleLoader } from 'react-spinners';
 const MyPaymentHistory = () => {
-    const axiosFetch = useAxiosFetch();
     const axiosSecure = useAxiosSecure();
     const { currentUser } = useUser();
     const [payments, setPayments] = useState([]);
@@ -28,7 +26,7 @@ const MyPaymentHistory = () => {
     }, [page, payments])
 
     useEffect(() => {
-        axiosFetch.get(`/payment-history/${currentUser.email}`)
+        axiosSecure.get(`/payment-history/${currentUser.email}`)
             .then(res => {
                 setPayments(res.data)
                 setLoading(false)

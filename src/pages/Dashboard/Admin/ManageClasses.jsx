@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAxiosFetch from '../../../hooks/useAxiosFetch';
 import { FcDeleteDatabase } from 'react-icons/fc';
 import { GrUpdate } from 'react-icons/gr';
 import useAxiosSecure from '../../../hooks/useAxiosSecure';
@@ -9,30 +8,21 @@ import { Pagination, ThemeProvider, createTheme } from '@mui/material';
 
 const ManageClasses = () => {
     const navigate = useNavigate();
-    const axiosFetch = useAxiosFetch();
     const axiosSecure = useAxiosSecure();
     const [classes, setClasses] = useState([]); 
     const [page, setPage] = useState(1);
-    const [paginatedData, setPaginatedData] = useState([]);
     const itemPerPage = 5;
-    const totalPage = Math.ceil(classes.length / 5);
+    const totalPage = Math.ceil(classes.length / itemPerPage);
 
 
     useEffect(() => {
-        axiosFetch.get('/classes-manage')
+        axiosSecure.get('/classes-manage')
             .then(res => setClasses(res.data))
             .catch(err => console.log(err))
     }, [])
 
-    useEffect(()=>{
-        let lastIndex = page * itemPerPage;
-        const firstIndex = lastIndex - itemPerPage;
-        if (lastIndex > classes.length) {
-            lastIndex = classes.length;
-        }
-        const currentData = classes.slice(firstIndex, lastIndex);
-        setPaginatedData(currentData);
-    },[page,totalPage])
+    // Derived on every render so approve/reject status changes show immediately
+    const paginatedData = classes.slice((page - 1) * itemPerPage, page * itemPerPage);
 
 
     const theme = createTheme({
@@ -49,8 +39,7 @@ const ManageClasses = () => {
 
     const handleApprove = (id) => {
         axiosSecure.put(`/change-status/${id}`, { status: 'approved' })
-            .then(res => {
-                console.log(res.data)
+            .then(() => {
                 setClasses(classes.map(cls => cls._id == id ? { ...cls, status: 'approved' } : cls))
             })
             .catch(err => console.log(err))
